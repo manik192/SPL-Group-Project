@@ -1,4 +1,4 @@
-# Indian Spice Hub — Mostly-Go Project Skeleton (≥70% Go)
+# Indian Spice Hub
 
 Server-rendered Go app using chi, gorilla/sessions, gorilla/csrf, and sqlx.
 Postgres by default (docker-compose included).
