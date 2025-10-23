@@ -1,0 +1,32 @@
+{{ define "base" }}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>{{ block "title" . }}Indian Spice Hub{{ end }}</title>
+<link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+<header>
+  <h1><a href="/">Indian Spice Hub</a></h1>
+  <nav>
+    <a href="/menu">Menu</a>
+    <a href="/cart">Cart</a>
+    {{ if .UserID }}
+      <form method="post" action="/auth/logout" style="display:inline">
+        <input type="hidden" name="gorilla.csrf.Token" value="{{ .CSRFToken }}" />
+        <button>Logout</button>
+      </form>
+    {{ else }}
+      <a href="/auth/login">Login</a>
+      <a href="/auth/signup">Sign Up</a>
+    {{ end }}
+  </nav>
+</header>
+<main>
+  {{ block "content" . }}{{ end }}
+</main>
+<footer><small>Charlotte · Authentic Indian Cuisine</small></footer>
+</body>
+</html>
+{{ end }}

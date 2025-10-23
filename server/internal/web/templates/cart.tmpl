@@ -1,0 +1,34 @@
+{{ define "title" }}Cart · Indian Spice Hub{{ end }}
+{{ template "base" . }}
+{{ define "content" }}
+  <h2>Your Cart</h2>
+  {{ if not .Items }}<p>Empty. <a href="/menu">Add dishes</a>.</p>{{ else }}
+  <table>
+    <tr><th>Item</th><th>Qty</th><th>Actions</th></tr>
+    {{ range .Items }}
+    <tr>
+      <td>Dish #{{ .DishID }}</td>
+      <td>
+        <form method="post" action="/cart/update" class="inline">
+          <input type="hidden" name="gorilla.csrf.Token" value="{{ $.CSRFToken }}" />
+          <input type="hidden" name="item_id" value="{{ .ID }}" />
+          <input type="number" name="qty" value="{{ .Qty }}" min="1" />
+          <button>Update</button>
+        </form>
+      </td>
+      <td>
+        <form method="post" action="/cart/remove" class="inline">
+          <input type="hidden" name="gorilla.csrf.Token" value="{{ $.CSRFToken }}" />
+          <input type="hidden" name="item_id" value="{{ .ID }}" />
+          <button>Remove</button>
+        </form>
+      </td>
+    </tr>
+    {{ end }}
+  </table>
+  <form method="post" action="/orders/place">
+    <input type="hidden" name="gorilla.csrf.Token" value="{{ $.CSRFToken }}" />
+    <button>Place Order</button>
+  </form>
+  {{ end }}
+{{ end }}

@@ -1,0 +1,12 @@
+{{ define "title" }}Sign Up · Indian Spice Hub{{ end }}
+{{ template "base" . }}
+{{ define "content" }}
+<h2>Sign Up</h2>
+{{ if .Error }}<p class="err">{{ .Error }}</p>{{ end }}
+<form method="post">
+  <input type="hidden" name="gorilla.csrf.Token" value="{{ $.CSRFToken }}" />
+  <label>Email <input name="email" type="email" required></label>
+  <label>Password <input name="password" type="password" required></label>
+  <button>Create Account</button>
+</form>
+{{ end }}

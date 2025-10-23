@@ -1,0 +1,20 @@
+{{ define "title" }}Menu · Indian Spice Hub{{ end }}
+{{ template "base" . }}
+{{ define "content" }}
+  <h2>Menu</h2>
+  <div class="grid">
+    {{ range .Items }}
+    <div class="card">
+      <h3>{{ .Name }}</h3>
+      <p>{{ .Description }}</p>
+      <strong>$ {{ printf "%.2f" (div100 .PriceCents) }}</strong>
+      <form method="post" action="/cart/add">
+        <input type="hidden" name="gorilla.csrf.Token" value="{{ $.CSRFToken }}" />
+        <input type="hidden" name="dish_id" value="{{ .ID }}" />
+        <input type="number" name="qty" value="1" min="1" />
+        <button>Add to cart</button>
+      </form>
+    </div>
+    {{ end }}
+  </div>
+{{ end }}
