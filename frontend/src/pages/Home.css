@@ -1,0 +1,100 @@
+/* Home.css */
+
+.home-container {
+  padding: 40px 60px;
+  background-color: #fafafa;
+  min-height: 100vh;
+  font-family: "Poppins", sans-serif;
+}
+
+.home-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #e11d48;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.restaurant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 25px;
+}
+
+/* ---- Card ---- */
+.restaurant-card {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+}
+
+.restaurant-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.restaurant-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.restaurant-info {
+  padding: 15px;
+}
+
+.restaurant-info h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 8px;
+}
+
+.restaurant-details {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.restaurant-rating {
+  display: inline-flex;
+  align-items: center;
+  background-color: #e11d48;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 5px;
+}
+
+.restaurant-card:hover .restaurant-rating {
+  background-color: #be123c;
+}
+
+.restaurant-price {
+  color: #22c55e; /* green accent */
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .home-container {
+    padding: 20px;
+  }
+
+  .restaurant-grid {
+    gap: 18px;
+  }
+
+  .restaurant-card img {
+    height: 150px;
+  }
+}
