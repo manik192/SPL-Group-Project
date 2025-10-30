@@ -1,31 +1,32 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Homes from './components/Homes';
+import OrderPizza from './components/OrderPizza';
+import BuildUrPizza from './components/BuildUrPizza';
+import Login from './components/Login';
+import Register from './components/Register';
+import Cart from './components/Cart';
+import CheckLogin from './components/CheckLogin';
+import ProtectedRoute from './components/ProtectedRoute';
+import Landing from './components/Landing';
 
-// Pages (we’ll create them soon)
-import Home from "./pages/Home";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import Login from "./pages/Login";
-import OrderSuccess from "./pages/OrderSuccess";
-
-// Components
-import Navbar from "./components/Navbar";
-
-export default function App() {
+function App() {
   return (
-    <Router>
-      <div className="app-container">
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <main style={{ padding: "20px" }}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/order-success" element={<OrderSuccess />} />
-          </Routes>
-        </main>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/landing" element={<Landing />} />
+          <Route path="/Login" element={<Login />} />
+          <Route path="/Register" element={<Register />} />
+          <Route path="/Homes" element={<Homes />} />
+          <Route path="/Menu" element={<ProtectedRoute><OrderPizza /></ProtectedRoute>} />
+          <Route path="/BuildUrPizza" element={<ProtectedRoute><BuildUrPizza /></ProtectedRoute>} />
+          <Route path="/Cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+          <Route path="/CheckLogin" element={<ProtectedRoute><CheckLogin /></ProtectedRoute>} />
+        </Routes>
       </div>
-    </Router>
-  );
+  )
 }
+
+export default App;

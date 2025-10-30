@@ -89,7 +89,7 @@ const restaurants = [
     price: "$4 off on orders $35+",
     image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8aW5kaWFuJTIwZm9vZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=1000"
   },
-  
+
 ];
 
 export default restaurants;
