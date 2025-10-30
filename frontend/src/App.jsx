@@ -7,6 +7,7 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Login from "./pages/Login";
 import OrderSuccess from "./pages/OrderSuccess";
+import Signup from "./pages/Signup";
 
 // Components
 import Navbar from "./components/Navbar";
@@ -22,6 +23,7 @@ export default function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
             <Route path="/order-success" element={<OrderSuccess />} />
           </Routes>
         </main>

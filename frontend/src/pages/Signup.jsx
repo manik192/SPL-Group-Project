@@ -1,35 +1,34 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-export default function Login() {
-  const [mode, setMode] = useState("user"); // "user" | "vendor"
+export default function Signup() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isVendor, setIsVendor] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
     setLoading(true);
     try {
-      // TODO: Wire this up to your backend endpoints
-      // Example endpoints (adjust to your backend):
-      //   User:   POST /api/auth/login
-      //   Vendor: POST /api/vendor/auth/login
-      // const endpoint = mode === "user" ? "/api/auth/login" : "/api/vendor/auth/login";
-      // const res = await fetch(endpoint, {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ email, password })
+      // TODO: Wire up to your backend signup endpoint
+      // Example:
+      // const res = await fetch(isVendor ? '/api/vendor/auth/signup' : '/api/auth/signup', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ name, email, password, role: isVendor ? 'vendor' : 'user' })
       // });
-      // if (!res.ok) throw new Error("Invalid credentials");
-      // const data = await res.json();
-      // console.log("Logged in:", data);
-
-      // Temporary UX until API is connected
       await new Promise((r) => setTimeout(r, 600));
-      alert(`${mode === "user" ? "User" : "Vendor"} login submitted for ${email}`);
+      // eslint-disable-next-line no-alert
+      alert(`Registration submitted for ${name} as ${isVendor ? 'Vendor' : 'User'}`);
     } catch (err) {
       setError(err?.message || "Something went wrong");
     } finally {
@@ -37,60 +36,20 @@ export default function Login() {
     }
   };
 
-  const resetAndSetMode = (nextMode) => {
-    setMode(nextMode);
-    setEmail("");
-    setPassword("");
-    setError("");
-  };
-
   return (
     <div style={{ display: "flex", justifyContent: "center", padding: "2rem" }}>
-      <div style={{ width: "100%", maxWidth: 420 }}>
+      <div style={{ width: "100%", maxWidth: 480 }}>
         <h1
           style={{
             marginBottom: "1rem",
             textAlign: "center",
-            color: "#f97316", // orange-500
+            color: "#f97316",
             fontWeight: 800,
             letterSpacing: 0.3,
           }}
         >
-          Login
+          Register
         </h1>
-
-        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-          <button
-            type="button"
-            onClick={() => resetAndSetMode("user")}
-            style={{
-              flex: 1,
-              padding: "0.6rem 1rem",
-              borderRadius: 8,
-              border: mode === "user" ? "2px solid #2563eb" : "1px solid #d1d5db",
-              background: mode === "user" ? "#eff6ff" : "#ffffff",
-              color: "#111827",
-              cursor: "pointer",
-            }}
-          >
-            User
-          </button>
-          <button
-            type="button"
-            onClick={() => resetAndSetMode("vendor")}
-            style={{
-              flex: 1,
-              padding: "0.6rem 1rem",
-              borderRadius: 8,
-              border: mode === "vendor" ? "2px solid #2563eb" : "1px solid #d1d5db",
-              background: mode === "vendor" ? "#eff6ff" : "#ffffff",
-              color: "#111827",
-              cursor: "pointer",
-            }}
-          >
-            Vendor
-          </button>
-        </div>
 
         <form onSubmit={onSubmit} style={{ display: "grid", gap: 12 }}>
           {error ? (
@@ -107,13 +66,29 @@ export default function Login() {
           ) : null}
 
           <label style={{ display: "grid", gap: 6 }}>
+            <span style={{ fontSize: 14, color: "#374151" }}>Name</span>
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your full name"
+              style={{
+                padding: "0.6rem 0.75rem",
+                borderRadius: 8,
+                border: "1px solid #d1d5db",
+              }}
+            />
+          </label>
+
+          <label style={{ display: "grid", gap: 6 }}>
             <span style={{ fontSize: 14, color: "#374151" }}>Email</span>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder={mode === "vendor" ? "vendor@example.com" : "user@example.com"}
+              placeholder="you@example.com"
               style={{
                 padding: "0.6rem 0.75rem",
                 borderRadius: 8,
@@ -138,6 +113,22 @@ export default function Login() {
             />
           </label>
 
+          <label style={{ display: "grid", gap: 6 }}>
+            <span style={{ fontSize: 14, color: "#374151" }}>Re-enter Password</span>
+            <input
+              type="password"
+              required
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="••••••••"
+              style={{
+                padding: "0.6rem 0.75rem",
+                borderRadius: 8,
+                border: "1px solid #d1d5db",
+              }}
+            />
+          </label>
+
           <button
             type="submit"
             disabled={loading}
@@ -149,12 +140,23 @@ export default function Login() {
               background: loading ? "#93c5fd" : "#2563eb",
               color: "#ffffff",
               cursor: loading ? "not-allowed" : "pointer",
-              fontWeight: 600,
+              fontWeight: 700,
             }}
           >
-            {loading ? "Signing in..." : `Sign in as ${mode === "user" ? "User" : "Vendor"}`}
+            {loading ? "Creating account..." : "Create account"}
           </button>
         </form>
+
+        <div style={{ marginTop: 12 }}>
+          <label style={{ display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={isVendor}
+              onChange={(e) => setIsVendor(e.target.checked)}
+            />
+            <span style={{ fontSize: 14, color: "#374151" }}>Register as vendor</span>
+          </label>
+        </div>
 
         <div style={{
           marginTop: 16,
@@ -164,26 +166,24 @@ export default function Login() {
           gap: 8,
           flexWrap: "wrap",
         }}>
-          <span style={{ fontSize: 14, color: "#374151" }}>New here?</span>
+          <span style={{ fontSize: 14, color: "#374151" }}>Already have an account?</span>
           <Link
-            to="/signup"
+            to="/login"
             style={{
               textDecoration: "none",
-              background: "#fb923c", // orange-400
+              background: "#fb923c",
               color: "#111827",
               padding: "0.45rem 0.8rem",
               borderRadius: 8,
               fontWeight: 700,
             }}
           >
-            Register
+            Login
           </Link>
         </div>
-
-        <p style={{ marginTop: 12, fontSize: 12, color: "#6b7280", textAlign: "center" }}>
-          By continuing, you agree to our Terms and Privacy Policy.
-        </p>
       </div>
     </div>
   );
 }
+
+
