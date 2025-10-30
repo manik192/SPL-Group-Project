@@ -24,7 +24,7 @@ A modern React-based frontend application for an Indian restaurant food delivery
    ```bash
    npm run dev
    ```
-   The application will be available at `http://localhost:5174/`
+   The application will be available at `http://localhost:5173/`
 
 4. **Build for production**
    ```bash
@@ -45,14 +45,12 @@ frontend/
 │   └── vite.svg               # Vite default icon
 ├── src/                       # Source code
 │   ├── components/            # React components
-│   │   ├── BuildUrPizza.jsx   # Custom meal builder (placeholder)
 │   │   ├── Cart.jsx           # Shopping cart (placeholder)
 │   │   ├── CheckLogin.jsx     # Login verification (placeholder)
 │   │   ├── Homes.jsx          # Restaurant listing page
 │   │   ├── Landing.jsx        # Landing/home page
 │   │   ├── Login.jsx          # User login form
 │   │   ├── Navbar.jsx         # Navigation bar
-│   │   ├── OrderPizza.jsx     # Menu page (placeholder)
 │   │   ├── ProtectedRoute.jsx # Route protection wrapper
 │   │   ├── Register.jsx       # User registration form
 │   │   └── RestaurantCard.jsx # Restaurant display card
@@ -140,8 +138,6 @@ frontend/
 | `/Login` | Login | Public | User login form |
 | `/Register` | Register | Public | User registration form |
 | `/Homes` | Homes | Public | Restaurant listings |
-| `/Menu` | OrderPizza | Protected | Restaurant menu (placeholder) |
-| `/BuildUrPizza` | BuildUrPizza | Protected | Custom meal builder (placeholder) |
 | `/Cart` | Cart | Protected | Shopping cart (placeholder) |
 | `/CheckLogin` | CheckLogin | Protected | Login verification (placeholder) |
 
@@ -329,31 +325,4 @@ Generates optimized static files in the `dist/` directory.
 - Lazy loading for route-based code splitting
 - Optimized images and assets
 
-## 🔮 Future Enhancements
 
-### Planned Features
-- Complete menu system implementation
-- Shopping cart functionality
-- Order management system
-- Payment integration
-- User profile management
-- Order history and tracking
-
-### Technical Improvements
-- TypeScript migration
-- Unit and integration testing
-- Progressive Web App (PWA) features
-- Advanced state management (Redux/Zustand)
-- Real-time features with WebSockets
-
-## 📞 Support
-
-For development issues or questions:
-1. Check the troubleshooting section above
-2. Review Vite documentation: https://vitejs.dev/
-3. Check React documentation: https://react.dev/
-4. Review Tailwind CSS docs: https://tailwindcss.com/
-
----
-
-**Built with ❤️ using modern web technologies for the best Indian food delivery experience.**

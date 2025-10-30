@@ -47,12 +47,7 @@ const Navbar = () => {
                             >
                                 Menu
                             </button>
-                            <button 
-                                className="text-gray-700 hover:text-orange-600 font-medium transition-colors" 
-                                onClick={() => handleNavigate("/BuildUrPizza")}
-                            >
-                                Build Your Meal
-                            </button>
+                            
                         </>
                     )}
                 </div>
