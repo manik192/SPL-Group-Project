@@ -1,0 +1,149 @@
+[{
+  "_id": {
+    "$oid": "615db1bd0a1e8e4336d2efb9"
+  },
+  "id": "0001",
+  "type": "veg",
+  "price": 14,
+  "name": "Paneer Tikka",
+  "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgJKHbqwxw8Gz3prOp4vvtRl60xFTB6cscvQ&s",
+  "description": "This is popular italian pizza flavoured with marinated tikka sauce and paneer         ",
+  "ingredients": [
+    "dough/flour",
+    "pizza saucce",
+    "pizza sauce seasoning",
+    "cheese"
+  ],
+  "topping": [
+    "Paneer",
+    "Fried Onion",
+    "Green olive",
+    "Capsicum",
+    "Red peprika"
+  ]
+},{
+  "_id": {
+    "$oid": "615db1bd0a1e8e4336d2efba"
+  },
+  "id": "0002",
+  "type": "nonveg",
+  "price": 16,
+  "name": "Chicken Italiaona",
+  "image": "https://as1.ftcdn.net/jpg/02/70/38/94/1000_F_270389487_7NUPjKE3piUpTtQxtSrDhtMXKsuErvco.jpg",
+  "description": "This is popular italian pizza flavoured with light sugary taste and creamy touch",
+  "ingredients": [
+    "deep dish pizza mix",
+    "pizza saucce",
+    "pizza sauce seasoning",
+    "cheese",
+    "sugar and cinnomon blend",
+    "plain butter"
+  ],
+  "topping": [
+    "Pepperoni",
+    "Chicken Sausage",
+    "Mushroom",
+    "Capsicum",
+    "Black beans"
+  ]
+},{
+  "_id": {
+    "$oid": "615db1bd0a1e8e4336d2efbb"
+  },
+  "id": "0003",
+  "type": "veg",
+  "price": 15,
+  "name": "Veggie Supreme",
+  "image": "http://t3.ftcdn.net/jpg/09/99/60/04/240_F_999600495_8QiHqHMUmMAXxw79gcBA5RFWly097gcp.jpg",
+  "description": "This is popular italian pizza flavoured with crushed garlic, with multiple herbs topped up with sweet corn",
+  "ingredients": [
+    "deep dish pizza mix",
+    "pizza saucce",
+    "pizza sauce seasoning",
+    "cheese",
+    "garlic herbs",
+    "flavored butter"
+  ],
+  "topping": [
+    "Fried Onion",
+    "Sweet corn",
+    "Mushroom",
+    "Capsicum",
+    "Black olive "
+  ]
+},{
+  "_id": {
+    "$oid": "615db1bd0a1e8e4336d2efbc"
+  },
+  "id": "0004",
+  "type": "nonveg",
+  "price": 13,
+  "name": "Tripple Chicken Feast",
+  "image": "https://thumb9.shutterstock.com/image-photo/stock-photo-mixture-pizza-italian-food-450w-332497832.jpg",
+  "description": "This is popular italian pizza flavoured with unique greek dressing topped up with keema and meat ball",
+  "ingredients": [
+    "low carb pizza dough",
+    "pizza saucce",
+    "pizza sauce seasoning",
+    "cheese",
+    "greek dressing",
+    "cajun"
+  ],
+  "topping": [
+    "Chicken keema",
+    "Fried Onion",
+    "Chicken Meat ball",
+    "Capsicum",
+    "Sweet corn"
+  ]
+},{
+  "_id": {
+    "$oid": "615db1bd0a1e8e4336d2efbd"
+  },
+  "id": "0005",
+  "type": "nonveg",
+  "price": 16,
+  "name": "Ultimate Chicken",
+  "image": "https://thumb7.shutterstock.com/display_pic_with_logo/2793292/246331354/stock-photo-pizza-margherita-italian-246331354.jpg",
+  "description": "This is popular italian pizza flavoured with BBA sauce, flavored butter. it has spongy base which gives unique taste with multiple toppings",
+  "ingredients": [
+    "deep dish pizza mix",
+    "pizza saucce",
+    "pizza sauce seasoning",
+    "cheese",
+    "BBQ sauce",
+    "cajun",
+    "flavored butter"
+  ],
+  "topping": [
+    "Pepperoni",
+    "Fried Onion",
+    "Chicken Meat ball",
+    "Chicken Sausage",
+    "Chicken keema"
+  ]
+},{
+  "_id": {
+    "$oid": "615db1bd0a1e8e4336d2efbf"
+  },
+  "id": "0006",
+  "type": "veg",
+  "price": 13,
+  "name": "Mexican Green Wave",
+  "image": "https://www.dominos.co.in//files/items/Mexican_Green_Wave.jpg",
+  "description": "A zesty and spicy pizza loaded with crunchy onions, crisp capsicum, juicy tomatoes, and jalapeños with a Mexican twist.",
+  "ingredients": [
+    "classic hand tossed dough",
+    "spicy Mexican sauce",
+    "cheese",
+    "oregano seasoning"
+  ],
+  "topping": [
+    "Onion",
+    "Capsicum",
+    "Tomato",
+    "Jalapeños",
+    "Cheese burst"
+  ]
+}
+]
