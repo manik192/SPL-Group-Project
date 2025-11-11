@@ -45,8 +45,8 @@
   },
   "proxy": "http://localhost:8080",
   "devDependencies": {
-    "autoprefixer": "^9.8.8",
-    "postcss": "^7.0.39",
-    "tailwindcss": "^2.2.19"
-  }
+  "autoprefixer": "^10.0.2",
+  "postcss": "^8.2.14",
+  "tailwindcss": "^2.2.19"
+}
 }
