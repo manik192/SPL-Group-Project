@@ -1,0 +1,19 @@
+Force normal horizontal text anywhere in the restaurant list
+.restaurant-card, .restaurant-card * {
+  writing-mode: horizontal-tb !important;
+  transform: none !important;        /* in case a parent rotated text */
+  white-space: normal !important;
+  word-break: break-word !important;
+}
+
+/* Prevent ultra-narrow columns – each card gets a reasonable width */
+.restaurant-col {
+  flex: 0 0 320px !important;  /* base width */
+  max-width: 360px !important; /* don't stretch too wide */
+}
+
+.restaurant-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}

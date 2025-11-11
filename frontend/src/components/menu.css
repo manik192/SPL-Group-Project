@@ -1,0 +1,43 @@
+.menu-container {
+  max-width: 1100px;
+}
+
+.meta-sep { padding: 0 8px; color: #b0b0b0; }
+.section-title { margin-top: 8px; margin-bottom: 18px; font-weight: 600; }
+
+.menu-card { min-width: 260px; border-radius: 14px; overflow: hidden; }
+.menu-img { height: 160px; object-fit: cover; }
+.menu-name { white-space: normal; word-break: break-word; font-weight: 600; }
+.price-tag { color: #2e7d32; font-weight: 700; font-size: 1.05rem; }
+
+/* Sticky proceed-to-cart bar */
+.proceed-bar {
+  position: sticky;
+  bottom: 16px;
+  margin-top: 28px;
+  background: #ffffff;
+  border: 1px solid #e6e6e6;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.proceed-summary {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  font-weight: 600;
+}
+
+.proceed-total {
+  color: #2e7d32;
+  font-weight: 800;
+}
+
+.proceed-btn {
+  margin-left: auto;
+  min-width: 180px;
+}
