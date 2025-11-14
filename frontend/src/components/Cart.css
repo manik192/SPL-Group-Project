@@ -5,7 +5,7 @@
     flex-direction: column;
     align-items: center;
     padding: 40px;
-    background-color: #f4f4f4;
+    background: linear-gradient(135deg, #fef5ee 0%, #fde8d7 25%, #fdd7ba 50%, #fcc89b 75%, #fbb87d 100%);
 }
 
 /* Header Section */
@@ -167,3 +167,4 @@
     background-color: #dc2626 !important;
     border-color: #dc2626 !important;
 }
+

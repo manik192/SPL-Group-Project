@@ -24,7 +24,7 @@ function Cartt() {
     return (
         <div style={{
             minHeight: '100vh',
-            background: '#f5f5f5',
+            background: 'linear-gradient(135deg, #fef5ee 0%, #fde8d7 25%, #fdd7ba 50%, #fcc89b 75%, #fbb87d 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -46,7 +46,7 @@ function Cartt() {
                         marginBottom: '24px'
                     }}>
                         🍛 Your order is being freshly prepared. Sit back and relax!!
-                  </h1>
+                    </h1>
 
                     <p style={{
                         fontSize: '1.125rem',
@@ -125,7 +125,7 @@ function Cartt() {
                         color: '#2d2d2d',
                         marginBottom: '24px'
                     }}>
-                        No items in your cart yet 🛒  
+                        No items in your cart yet 🛒 
                         Explore our Indian dishes!
                     </h2>
 

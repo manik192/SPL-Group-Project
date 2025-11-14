@@ -101,7 +101,7 @@ export default function RestaurantMenu() {
   if (!r) return <div className="container py-5">Not found.</div>;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f5f5', paddingBottom: '120px' }}>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #fef5ee 0%, #fde8d7 25%, #fdd7ba 50%, #fcc89b 75%, #fbb87d 100%)', paddingBottom: '120px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 24px' }}>
         
         {/* Header */}
