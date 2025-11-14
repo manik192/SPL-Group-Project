@@ -7,6 +7,7 @@ function Cartt() {
     const navigate = useNavigate();
     const location = useLocation();
     const { logout } = useAuth();
+
     const isCartCheckedOut = location?.state?.isCartCheckedOut || false;
 
     const handleLogout = () => {
@@ -42,18 +43,19 @@ function Cartt() {
                         fontSize: '2rem',
                         fontWeight: '600',
                         color: '#ea580c',
-                        marginBottom: '24px',
-                        lineHeight: '1.4'
+                        marginBottom: '24px'
                     }}>
-                        🍕 Your food is getting COOKED, sit back and relax with a glass of wine!!
-                    </h1>
+                        🍛 Your order is being freshly prepared. Sit back and relax!!
+                  </h1>
+
                     <p style={{
                         fontSize: '1.125rem',
                         color: '#8e8e8e',
                         marginBottom: '48px'
                     }}>
-                        Sit back and relax while your hot & tasty food makes its way to you.
+                        Please relax while our chefs cook your flavorful Indian dishes with love and spices 🌶️✨
                     </p>
+
                     <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
                         <Link 
                             to="/restaurants"
@@ -80,6 +82,7 @@ function Cartt() {
                         >
                             Back to Menu
                         </Link>
+
                         <button 
                             onClick={handleLogout}
                             style={{
@@ -117,22 +120,27 @@ function Cartt() {
                     maxWidth: '600px',
                     textAlign: 'center'
                 }}>
-                    <h2 style={{ fontSize: '1.5rem', color: '#2d2d2d', marginBottom: '24px' }}>
-                        No items in cart to checkout 😕
+                    <h2 style={{
+                        fontSize: '1.5rem',
+                        color: '#2d2d2d',
+                        marginBottom: '24px'
+                    }}>
+                        No items in your cart yet 🛒  
+                        Explore our Indian dishes!
                     </h2>
+
                     <Link 
                         to="/restaurants"
                         style={{
                             background: '#ea580c',
                             color: 'white',
-                            border: 'none',
                             padding: '14px 40px',
                             borderRadius: '12px',
                             fontWeight: '600',
                             fontSize: '1rem',
                             textDecoration: 'none',
                             display: 'inline-block',
-                            transition: 'all 0.2s'
+                            transition: '0.2s'
                         }}
                         onMouseEnter={(e) => e.currentTarget.style.background = '#dc2626'}
                         onMouseLeave={(e) => e.currentTarget.style.background = '#ea580c'}

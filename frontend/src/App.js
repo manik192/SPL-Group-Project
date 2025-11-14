@@ -1,23 +1,6 @@
-// import './App.css';
-// import bootstap from '../node_modules/bootstrap/dist/css/bootstrap.min.css'
-// import Navbar from './components/Navbar';
-
-// import './index.css'
-// function App() {
-//   return (
-//       <div className="App">
-//         <Navbar />
-//       </div>
-
-//   )
-// }
-
-// export default App;
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Homes from './components/Homes';
-import OrderPizza from './components/OrderPizza';
-import BuildUrPizza from './components/BuildUrPizza';
 import Login from './components/Login';
 import Register from './components/Register';
 import Cart from './components/Cart';
@@ -48,17 +31,7 @@ function App() {
 
         {/* Protected routes (change logic per v6, see notes below!) */}
         {/* For v6, you must use element={<ProtectedRoute><OrderPizza /></ProtectedRoute>} */}
-        <Route path="/OrderPizza" element={
-          <ProtectedRoute>
-            <OrderPizza />
-          </ProtectedRoute>
-        } />
-
-        <Route path="/BuildYourMeal" element={
-          <ProtectedRoute>
-            <BuildUrPizza />
-          </ProtectedRoute>
-        } />
+     
 
         <Route path="/Cart" element={
           <ProtectedRoute>

@@ -48,6 +48,8 @@ func UserRoute(app *fiber.App) {
 
 	app.Get("/restaurants", controllers.ListRestaurants)
 	app.Get("/restaurants/:id", controllers.GetRestaurantByID)
-	
-	
+
+	app.Post("/addmenu", controllers.AddMenu)
+
+	app.Post("/editmenu", controllers.EditMenu)
 }
