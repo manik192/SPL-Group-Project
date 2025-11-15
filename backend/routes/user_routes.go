@@ -58,4 +58,7 @@ func UserRoute(app *fiber.App) {
 	app.Get("/orders", controllers.GetOrders)
 
 	app.Get("/getuser", controllers.GetUser)
+
+	app.Post("/completeorder", controllers.CompleteOrder)
+
 }

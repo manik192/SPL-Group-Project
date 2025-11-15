@@ -91,9 +91,11 @@ export default function Cart() {
         const tax = subtotal * taxRate;
         const total = subtotal + tax + deliveryFee;
         const restaurantName = itemsToCheckout[0].restaurantName;
+        const ownerName = itemsToCheckout[0].ownerName;
 
         const orderPayload = {
             restaurantName,
+            ownerName,
             items: itemsToCheckout,
             subtotal,
             tax,

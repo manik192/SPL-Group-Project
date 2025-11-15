@@ -725,3 +725,46 @@ func GetUser(c *fiber.Ctx) error {
 	// Return user
 	return c.JSON(user)
 }
+
+
+func CompleteOrder(c *fiber.Ctx) error {
+    type requestBody struct {
+        UserName  string `json:"user_name"`
+        OwnerName string `json:"ownerName"`
+    }
+
+    var body requestBody
+    if err := c.BodyParser(&body); err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
+    }
+
+    if body.UserName == "" || body.OwnerName == "" {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "user_name and ownerName are required"})
+    }
+
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
+
+    ordersCollection := config.GetCollection(config.DB, "orders")
+
+    // Build the filter
+    filter := bson.M{
+        "UserName":  body.UserName,
+        "OwnerName": body.OwnerName,
+    }
+
+    // Print the filter for debugging
+    fmt.Printf("MongoDB delete filter: %+v\n", filter)
+
+    // Delete all orders matching the filter
+    res, err := ordersCollection.DeleteMany(ctx, filter)
+    if err != nil {
+        return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to complete order"})
+    }
+
+    return c.JSON(fiber.Map{
+        "message":       "Order(s) completed successfully",
+        "deleted_count": res.DeletedCount,
+    })
+}
+

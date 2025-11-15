@@ -77,40 +77,47 @@ const RestaurantDashboard = () => {
   };
 
   // C. Fetch Orders Logic
-  const fetchOrders = async (owner) => {
-    setOrdersLoading(true);
-    try {
-      const res = await axios.get("http://localhost:8080/orders");
+ // C. Fetch Orders Logic
+const fetchOrders = async (owner) => {
+  setOrdersLoading(true);
+  try {
+    const res = await axios.get("http://localhost:8080/orders");
 
-      // Filter by ownerName
-      const filtered = res.data.filter(o => o.ownerName?.toLowerCase() === owner.toLowerCase());
+    // Filter by restaurant owner
+    const filtered = res.data.filter(o => o.ownerName?.toLowerCase() === owner.toLowerCase());
 
-      // Group by user_name
-      const grouped = filtered.reduce((acc, curr) => {
-        if (!acc[curr.user_name]) {
-          acc[curr.user_name] = {
-            user_name: curr.user_name,
-            mob: curr.mob,
-            email: curr.email,
-            items: []
-          };
-        }
-        acc[curr.user_name].items.push({
-          name: curr.name,
-          image: curr.image,
-          price: curr.price,
-          quantity: curr.quantity
+    // Group orders by user_name (top-level)
+    const grouped = filtered.reduce((acc, curr) => {
+      const userKey = curr.user_name || "Unknown User";
+      if (!acc[userKey]) {
+        acc[userKey] = {
+          user_name: curr.user_name,
+          mob: curr.mob,
+          email: curr.email,
+          items: [],
+          total: curr.total
+        };
+      }
+      // Push all items of this order
+      curr.items.forEach(item => {
+        acc[userKey].items.push({
+          Name: item.Name,
+          Price: item.Price,
+          Quantity: item.Quantity,
+          Image: item.Image
         });
-        return acc;
-      }, {});
+      });
+      return acc;
+    }, {});
 
-      setOrders(Object.values(grouped));
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setOrdersLoading(false);
-    }
-  };
+    setOrders(Object.values(grouped));
+  } catch (err) {
+    console.error("Failed to fetch orders:", err);
+  } finally {
+    setOrdersLoading(false);
+  }
+};
+
 
   // D. Load Item into Form for Editing
   const handleEditClick = (item) => {
@@ -178,6 +185,18 @@ const RestaurantDashboard = () => {
     localStorage.clear();
     navigate("/Login");
   };
+
+  const handleCompleteOrder = async (userName) => {
+  try {
+    // Send request to backend to mark all orders of this user as completed
+    await axios.post("http://localhost:8080/completeorder", { user_name: userName, ownerName });
+    
+    // Refresh orders after completion
+    fetchOrders(ownerName);
+  } catch (err) {
+    console.error("Failed to complete order:", err);
+  }
+};
 
   return (
     <div style={{ 
@@ -295,43 +314,55 @@ const RestaurantDashboard = () => {
         )}
 
         {/* --- CURRENT ORDERS SECTION --- */}
-        <div style={{ marginTop: "40px" }}>
-          <h3 style={{ color: "#374151", marginBottom: "15px" }}>🛒 Your Current Orders</h3>
+<div style={{ marginTop: "40px" }}>
+  <h3 style={{ color: "#374151", marginBottom: "15px" }}>🛒 Your Current Orders</h3>
 
-          {ordersLoading ? (
-            <div style={{ textAlign: "center", color: "#6b7280" }}>Loading orders...</div>
-          ) : orders.length === 0 ? (
-            <div style={{ textAlign: "center", color: "#9ca3af", background: "white", padding: "20px", borderRadius: "12px" }}>
-              No current orders yet.
-            </div>
-          ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))", gap: "20px" }}>
-              {orders.map((user, idx) => (
-                <div key={idx} style={{ background: "white", borderRadius: "12px", padding: "20px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
-                  <h4 style={{ margin: 0, color: "#1f2937" }}>{user.user_name}</h4>
-                  <p style={{ margin: "4px 0", fontSize: "13px", color: "#6b7280" }}>📞 {user.mob || "No mobile"}</p>
-                  <p style={{ margin: "4px 0", fontSize: "13px", color: "#6b7280" }}>📧 {user.email || "No email"}</p>
+  {ordersLoading ? (
+    <div style={{ textAlign: "center", color: "#6b7280" }}>Loading orders...</div>
+  ) : orders.length === 0 ? (
+    <div style={{ textAlign: "center", color: "#9ca3af", background: "white", padding: "20px", borderRadius: "12px" }}>
+      No current orders yet.
+    </div>
+  ) : (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))", gap: "20px" }}>
+      {orders.map((user, idx) => {
+        const totalAmount = user.items.reduce((sum, item) => sum + item.Price * item.Quantity, 0);
+        return (
+          <div key={idx} style={{ background: "white", borderRadius: "12px", padding: "20px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
+            <h4 style={{ margin: 0, color: "#1f2937" }}>{user.user_name || "Unknown User"}</h4>
+            <p style={{ margin: "4px 0", fontSize: "13px", color: "#6b7280" }}>📞 {user.mob || "No mobile"}</p>
+            <p style={{ margin: "4px 0", fontSize: "13px", color: "#6b7280" }}>📧 {user.email || "No email"}</p>
+            <p style={{ fontWeight: "bold", margin: "6px 0", color: "#ea580c" }}>Total: ${user.total}</p>
 
-                  <div style={{ marginTop: "12px", borderTop: "1px solid #f3f4f6", paddingTop: "12px" }}>
-                    {user.items.map((item, i) => (
-                      <div key={i} style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
-                        {item.image && (
-                          <img src={item.image} alt={item.name} style={{ width: "60px", height: "60px", borderRadius: "8px", objectFit: "cover" }} />
-                        )}
-                        <div>
-                          <p style={{ margin: 0, fontWeight: "600" }}>{item.name}</p>
-                          <p style={{ margin: 0, fontSize: "13px", color: "#6b7280" }}>
-                            Qty: {item.quantity} × ${item.price}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+            <div style={{ marginTop: "12px", borderTop: "1px solid #f3f4f6", paddingTop: "12px" }}>
+              {user.items.map((item, i) => (
+                <div key={i} style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
+                  {item.Image && (
+                    <img src={item.Image} alt={item.Name} style={{ width: "60px", height: "60px", borderRadius: "8px", objectFit: "cover" }} />
+                  )}
+                  <div>
+                    <p style={{ margin: 0, fontWeight: "600" }}>{item.Name}</p>
+                    <p style={{ margin: 0, fontSize: "13px", color: "#6b7280" }}>
+                      Qty: {item.Quantity} × ${item.Price}
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
-          )}
-        </div>
+
+            <button 
+              onClick={() => handleCompleteOrder(user.user_name)}
+              style={{ marginTop: "10px", padding: "10px", background: "#16a34a", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", width: "100%" }}
+            >
+              ✅ Completed
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  )}
+</div>
+
 
       </div>
     </div>
