@@ -8,10 +8,12 @@ import (
 	"net/http"
 	"strconv" // <— add this
 	"time"
+	 "strings"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/google/uuid"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -205,7 +207,7 @@ func GetMenu(c *fiber.Ctx) error {
 func InsertCart(c *fiber.Ctx) error {
 	fmt.Println("Inside Insert/Update cart route")
 
-	var userCollection *mongo.Collection = config.GetCollection(config.DB, "cart")
+	var cartCollection *mongo.Collection = config.GetCollection(config.DB, "cart")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -214,23 +216,29 @@ func InsertCart(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid body parsing"})
 	}
 
-	// 1. Find by Name
-	filter := bson.M{"name": item.Name}
+	// 1. Find by Name and User (to make cart per user)
+	filter := bson.M{
+		"name":      item.Name,
+		"user_name": item.UserName, // Make sure model.CartCollection has UserName field
+	}
 
 	// 2. Increment Quantity, Set other fields
 	update := bson.M{
 		"$inc": bson.M{"quantity": item.Quantity},
 		"$set": bson.M{
-			"image": item.Image,
-			"price": item.Price,
+			"image":          item.Image,
+			"price":          item.Price,
+			"ownerName":      item.OwnerName,
+			"restaurantName": item.RestaurantName,
+			"user_name":      item.UserName,
+			"email":          item.Email,
 		},
 	}
 
 	// 3. Upsert = True (Create if not found)
 	opts := options.Update().SetUpsert(true)
 
-	_, err := userCollection.UpdateOne(ctx, filter, update, opts)
-
+	_, err := cartCollection.UpdateOne(ctx, filter, update, opts)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Database update failed"})
 	}
@@ -241,34 +249,41 @@ func InsertCart(c *fiber.Ctx) error {
 	})
 }
 
-// Shopping cart button to right
+
+// Retrieve shopping cart items for the currently logged-in user
 func RetriveToCart(c *fiber.Ctx) error {
-	// Retrieve items from the shopping cart
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	var CartCollection *mongo.Collection = config.GetCollection(config.DB, "cart")
-
-	var cart []model.CartCollection
-	defer cancel()
-
-	// Query all items from the shopping cart
-	results, err := CartCollection.Find(ctx, bson.M{})
-	if err != nil {
-		return c.JSON(&fiber.Map{"data": "error in fetching data"})
+	// Get logged-in user's name from query or headers (frontend should send it)
+	userName := c.Query("user_name") // or c.Get("user_name")
+	if userName == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "User name is required"})
 	}
 
-	// Read all items from the query results
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var cartCollection *mongo.Collection = config.GetCollection(config.DB, "cart")
+	var cart []model.CartCollection
+
+	// Query only items for the specific user
+	filter := bson.M{"user_name": userName}
+
+	results, err := cartCollection.Find(ctx, filter)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error fetching data"})
+	}
 	defer results.Close(ctx)
+
 	for results.Next(ctx) {
 		var singleItem model.CartCollection
 		if err = results.Decode(&singleItem); err != nil {
-			return c.JSON(&fiber.Map{"data": "error in fetching data"})
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error decoding data"})
 		}
-
 		cart = append(cart, singleItem)
 	}
 
 	return c.Status(http.StatusOK).JSON(cart)
 }
+
 
 // Login user
 func Login(c *fiber.Ctx) error {
@@ -602,4 +617,111 @@ func EditMenu(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(fiber.Map{
 		"message": "Menu item updated successfully",
 	})
+
+
+}
+
+func CreateOrder(c *fiber.Ctx) error {
+	fmt.Println("Inside CreateOrder route")
+
+	ordersCollection := config.GetCollection(config.DB, "orders")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var order model.OrderCollection
+	if err := c.BodyParser(&order); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
+	}
+
+	// Generate OrderID if not provided
+	if order.OrderID == "" {
+		order.OrderID = uuid.New().String()
+	}
+
+	// Set CreatedAt timestamp
+	order.CreatedAt = time.Now()
+
+	// Set default status
+	if order.Status == "" {
+		order.Status = "Pending"
+	}
+
+	// Insert order into MongoDB
+	_, err := ordersCollection.InsertOne(ctx, order)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create order"})
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"message": "Order created successfully",
+		"order":   order,
+	})
+
+
+}
+
+// GetOrders fetches all orders
+func GetOrders(c *fiber.Ctx) error {
+    ordersCollection := config.GetCollection(config.DB, "orders")
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
+
+    // Optional: fetch by owner query param
+    ownerName := c.Query("owner") // /orders?owner=ownerName
+
+    filter := bson.M{}
+    if ownerName != "" {
+        filter["ownerName"] = ownerName
+    }
+
+    cursor, err := ordersCollection.Find(ctx, filter)
+    if err != nil {
+        return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch orders"})
+    }
+    defer cursor.Close(ctx)
+
+    var orders []model.OrderCollection
+    if err := cursor.All(ctx, &orders); err != nil {
+        return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to parse orders"})
+    }
+
+    return c.Status(http.StatusOK).JSON(orders)
+}
+
+
+func GetUser(c *fiber.Ctx) error {
+	// Get username from query parameter
+	userName := c.Query("name")
+	userName = strings.TrimSpace(userName)
+	if userName == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Username is required"})
+	}
+
+	// Get users collection
+	usersCollection := config.GetCollection(config.DB, "users")
+
+	// Create context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Prepare case-insensitive filter
+	var user model.User
+	filter := bson.M{
+		"name": bson.M{
+			"$regex":   "^" + userName + "$",
+			"$options": "i", // case-insensitive
+		},
+	}
+
+	// Find user
+	err := usersCollection.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "User not found"})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Database error"})
+	}
+
+	// Return user
+	return c.JSON(user)
 }

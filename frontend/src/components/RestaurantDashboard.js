@@ -20,18 +20,20 @@ const RestaurantDashboard = () => {
   // 3. Data State
   const [dbMenu, setDbMenu] = useState([]);
   const [editingItemName, setEditingItemName] = useState(null);
+
+  // 4. Orders State
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
   
-  // 4. UI Status
+  // 5. UI Status
   const [status, setStatus] = useState({ isLoading: false, error: "", success: "" });
   const [isFetching, setIsFetching] = useState(true); // Auto-load on page start
 
   // --- ACTIONS ---
 
-  // A. Auth Check & Auto-Fetch Menu
+  // A. Auth Check & Auto-Fetch Menu & Orders
   useEffect(() => {
     const role = localStorage.getItem("ish_role");
-    // --- THIS IS THE FIX ---
-    // Changed "ish_user_name" to "ish_name" to match your screenshot
     const savedName = localStorage.getItem("ish_name"); 
 
     if (role !== "restaurant" || !savedName) {
@@ -40,14 +42,13 @@ const RestaurantDashboard = () => {
       return;
     }
 
-    // Set the secure name
     setOwnerName(savedName);
-    
-    // Auto-fetch menu
+
     fetchMenu(savedName);
-    
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only once on page load
+    fetchOrders(savedName);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // B. Fetch Menu Logic
   const fetchMenu = async (name) => {
@@ -55,7 +56,6 @@ const RestaurantDashboard = () => {
     setStatus(prev => ({ ...prev, error: "", success: "" }));
 
     try {
-      // Step 1: Find Restaurant ID (Case-insensitive)
       const resList = await axios.get("http://localhost:8080/restaurants");
       const myRestaurant = resList.data.find(r => r.ownerName.toLowerCase() === name.toLowerCase());
 
@@ -65,9 +65,7 @@ const RestaurantDashboard = () => {
         return;
       }
 
-      // Step 2: Get full details using the found ID
       const resDetail = await axios.get(`http://localhost:8080/restaurants/${myRestaurant.id}`);
-      
       setDbMenu(resDetail.data.menu || []);
       setStatus(prev => ({ ...prev, success: "Menu loaded successfully!" }));
     } catch (err) {
@@ -78,7 +76,43 @@ const RestaurantDashboard = () => {
     }
   };
 
-  // C. Load Item into Form for Editing
+  // C. Fetch Orders Logic
+  const fetchOrders = async (owner) => {
+    setOrdersLoading(true);
+    try {
+      const res = await axios.get("http://localhost:8080/orders");
+
+      // Filter by ownerName
+      const filtered = res.data.filter(o => o.ownerName?.toLowerCase() === owner.toLowerCase());
+
+      // Group by user_name
+      const grouped = filtered.reduce((acc, curr) => {
+        if (!acc[curr.user_name]) {
+          acc[curr.user_name] = {
+            user_name: curr.user_name,
+            mob: curr.mob,
+            email: curr.email,
+            items: []
+          };
+        }
+        acc[curr.user_name].items.push({
+          name: curr.name,
+          image: curr.image,
+          price: curr.price,
+          quantity: curr.quantity
+        });
+        return acc;
+      }, {});
+
+      setOrders(Object.values(grouped));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  // D. Load Item into Form for Editing
   const handleEditClick = (item) => {
     setEditingItemName(item.name);
     setMenuItem({
@@ -92,14 +126,14 @@ const RestaurantDashboard = () => {
     setStatus({ error: "", success: `Editing "${item.name}"...` });
   };
 
-  // D. Cancel Edit
+  // E. Cancel Edit
   const handleCancelEdit = () => {
     setEditingItemName(null);
     setMenuItem({ name: "", price: "", description: "", image: "", type: "veg" });
     setStatus({ error: "", success: "" });
   };
 
-  // E. Submit (Add or Update)
+  // F. Submit (Add or Update)
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -112,7 +146,7 @@ const RestaurantDashboard = () => {
 
     try {
       const payload = {
-        ownerName: ownerName, // Uses the SECURE name from state
+        ownerName: ownerName,
         menuItem: {
           ...menuItem,
           price: parseFloat(menuItem.price),
@@ -120,19 +154,16 @@ const RestaurantDashboard = () => {
       };
 
       if (editingItemName) {
-        // === EDIT MODE ===
         payload.originalName = editingItemName;
         await axios.post("http://localhost:8080/editmenu", payload);
         setStatus({ isLoading: false, error: "", success: "Item updated!" });
       } else {
-        // === ADD MODE ===
         await axios.post("http://localhost:8080/addmenu", payload);
         setStatus({ isLoading: false, error: "", success: "Item added!" });
       }
 
-      handleCancelEdit(); // Reset form
-      fetchMenu(ownerName); // Refresh list automatically
-
+      handleCancelEdit();
+      fetchMenu(ownerName);
     } catch (err) {
       const msg = err?.response?.data?.error || "Operation failed.";
       setStatus({ isLoading: false, error: msg, success: "" });
@@ -150,12 +181,12 @@ const RestaurantDashboard = () => {
 
   return (
     <div style={{ 
-        minHeight: "100vh", 
-        background: 'linear-gradient(135deg, #fef5ee 0%, #fde8d7 25%, #fdd7ba 50%, #fcc89b 75%, #fbb87d 100%)', 
-        padding: "24px" 
+      minHeight: "100vh", 
+      background: 'linear-gradient(135deg, #fef5ee 0%, #fde8d7 25%, #fdd7ba 50%, #fcc89b 75%, #fbb87d 100%)', 
+      padding: "24px" 
     }}>
       <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-        
+
         {/* Header */}
         <div style={{ background: "white", padding: "20px", borderRadius: "12px", marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
@@ -177,8 +208,7 @@ const RestaurantDashboard = () => {
           {status.success && <div style={{color: "green", marginBottom: 10, background: '#f0fdf4', padding: '10px', borderRadius: '6px'}}>✅ {status.success}</div>}
 
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-            
-            {/* Item Fields */}
+
             <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "15px" }}>
               <div>
                 <label style={labelStyle}>Item Name</label>
@@ -209,12 +239,10 @@ const RestaurantDashboard = () => {
               <textarea name="description" value={menuItem.description} onChange={handleChange} placeholder="Dish description..." style={{...inputStyle, minHeight: "60px"}} />
             </div>
 
-            {/* Buttons */}
             <div style={{ display: "flex", gap: "10px" }}>
               <button type="submit" disabled={status.isLoading || !ownerName} style={editingItemName ? btnStyleUpdate : btnStyleAdd}>
                 {status.isLoading ? "Processing..." : (editingItemName ? "Update Item" : "+ Add Item to Database")}
               </button>
-              
               {editingItemName && (
                 <button type="button" onClick={handleCancelEdit} style={btnStyleSecondary}>
                   Cancel Edit
@@ -224,7 +252,7 @@ const RestaurantDashboard = () => {
           </form>
         </div>
 
-        {/* --- EXISTING MENU LIST SECTION --- */}
+        {/* --- EXISTING MENU SECTION --- */}
         {isFetching ? (
           <div style={{textAlign: 'center', color: '#6b7280'}}>Loading menu...</div>
         ) : dbMenu.length > 0 ? (
@@ -265,6 +293,45 @@ const RestaurantDashboard = () => {
             Your menu is empty. Add your first item using the form above!
           </div>
         )}
+
+        {/* --- CURRENT ORDERS SECTION --- */}
+        <div style={{ marginTop: "40px" }}>
+          <h3 style={{ color: "#374151", marginBottom: "15px" }}>🛒 Your Current Orders</h3>
+
+          {ordersLoading ? (
+            <div style={{ textAlign: "center", color: "#6b7280" }}>Loading orders...</div>
+          ) : orders.length === 0 ? (
+            <div style={{ textAlign: "center", color: "#9ca3af", background: "white", padding: "20px", borderRadius: "12px" }}>
+              No current orders yet.
+            </div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))", gap: "20px" }}>
+              {orders.map((user, idx) => (
+                <div key={idx} style={{ background: "white", borderRadius: "12px", padding: "20px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
+                  <h4 style={{ margin: 0, color: "#1f2937" }}>{user.user_name}</h4>
+                  <p style={{ margin: "4px 0", fontSize: "13px", color: "#6b7280" }}>📞 {user.mob || "No mobile"}</p>
+                  <p style={{ margin: "4px 0", fontSize: "13px", color: "#6b7280" }}>📧 {user.email || "No email"}</p>
+
+                  <div style={{ marginTop: "12px", borderTop: "1px solid #f3f4f6", paddingTop: "12px" }}>
+                    {user.items.map((item, i) => (
+                      <div key={i} style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
+                        {item.image && (
+                          <img src={item.image} alt={item.name} style={{ width: "60px", height: "60px", borderRadius: "8px", objectFit: "cover" }} />
+                        )}
+                        <div>
+                          <p style={{ margin: 0, fontWeight: "600" }}>{item.name}</p>
+                          <p style={{ margin: 0, fontSize: "13px", color: "#6b7280" }}>
+                            Qty: {item.quantity} × ${item.price}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
       </div>
     </div>

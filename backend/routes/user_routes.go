@@ -52,4 +52,10 @@ func UserRoute(app *fiber.App) {
 	app.Post("/addmenu", controllers.AddMenu)
 
 	app.Post("/editmenu", controllers.EditMenu)
+
+	app.Post("/createorder", controllers.CreateOrder)
+
+	app.Get("/orders", controllers.GetOrders)
+
+	app.Get("/getuser", controllers.GetUser)
 }
