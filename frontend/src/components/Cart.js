@@ -9,78 +9,112 @@ export default function Cart() {
 
     // Fetch Cart Data
     useEffect(() => {
-        axios.get("http://localhost:8080/retrivetocart")
-            .then((response) => {
-                setCart(response.data || []);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    }, []);
+    const userName = localStorage.getItem("ish_name"); // or wherever you store it
+    if (!userName) return; // optional: redirect if not logged in
 
-    // Calculate Subtotal
-    const totalPrice = () => {
-        return cart != null
-            ? cart.reduce((total, item) => total + item.price * item.quantity, 0)
-            : 0;
-    };
+    axios.get(`http://localhost:8080/retrivetocart?user_name=${userName}`)
+        .then((response) => setCart(response.data || []))
+        .catch((err) => console.log(err));
+}, []);
+
 
     // Handle Delete (API Call)
     const handleRemove = (itemToRemove) => {
         axios.post("http://localhost:8080/deletefromcart", itemToRemove)
             .then(() => {
-                setCart(prevCart => prevCart.filter(item => item.name !== itemToRemove.name));
+                setCart(prevCart => prevCart.filter(item => 
+                    item.Name !== itemToRemove.Name || 
+                    item.user_name !== itemToRemove.user_name || 
+                    item.restaurantName !== itemToRemove.restaurantName
+                ));
             })
             .catch((err) => {
                 console.log(err);
             });
     };
 
-    // NEW: Handle Increment (+) and Decrement (-)
+    // Handle Increment (+) and Decrement (-)
     const handleQuantityChange = (item, delta) => {
-        const newQty = item.quantity + delta;
+        const newQty = item.Quantity + delta;
 
-        // 1. If quantity goes to 0, remove the item
         if (newQty <= 0) {
             handleRemove(item);
             return;
         }
 
-        // 2. Optimistic UI Update (Update screen immediately)
+        // Optimistic UI Update
         setCart(prevCart => prevCart.map(i => 
-            i.name === item.name ? { ...i, quantity: newQty } : i
+            i.Name === item.Name && i.user_name === item.user_name && i.restaurantName === item.restaurantName
+                ? { ...i, Quantity: newQty } 
+                : i
         ));
 
-        // 3. Send Update to Backend
+        // Send Update to Backend
         axios.post('http://localhost:8080/addtocart', {
             Image: item.Image || '',
-            Name: item.name,
-            Price: Number(item.price),
-            Quantity: delta // Sends +1 or -1
+            Name: item.Name,
+            Price: Number(item.Price),
+            Quantity: delta,
+            ownerName: item.ownerName,
+            restaurantName: item.restaurantName,
+            user_name: item.user_name,
+            email: item.email,
+            mob: item.mob || ""
         }).catch(err => {
             console.error("Failed to update quantity", err);
-            // Optional: Revert state here if API fails
         });
-    };
-
-    const handleCheckout = () => {
-        if(cart != null && cart.length > 0) {
-            axios.post("http://localhost:8080/clearcart")
-                .then(() => {
-                    setCart([]);
-                    navigate('/Cartt', { state: { isCartCheckedOut: true } });
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
-        }
     };
 
     const taxRate = 0.1; 
     const deliveryFee = 5; 
-    const subtotal = totalPrice();
-    const tax = subtotal * taxRate;
-    const total = subtotal + tax + deliveryFee;
+
+    // Group cart items by restaurant
+    const groupedCart = cart.reduce((acc, item) => {
+        const key = item.restaurantName;
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(item);
+        return acc;
+    }, {});
+    const groupedCartArray = Object.entries(groupedCart);
+
+    const handleCheckout = async (itemsToCheckout) => {
+    if (!itemsToCheckout || itemsToCheckout.length === 0) return;
+
+    try {
+        const userName = localStorage.getItem("ish_name"); // fetch from browser storage
+        if (!userName) throw new Error("User not logged in");
+
+        const userRes = await axios.get(`http://localhost:8080/getuser?name=${userName}`);
+        const user = userRes.data;
+
+        const subtotal = itemsToCheckout.reduce((sum, i) => sum + i.Price * i.Quantity, 0);
+        const tax = subtotal * taxRate;
+        const total = subtotal + tax + deliveryFee;
+        const restaurantName = itemsToCheckout[0].restaurantName;
+        const ownerName = itemsToCheckout[0].ownerName;
+
+        const orderPayload = {
+            restaurantName,
+            ownerName,
+            items: itemsToCheckout,
+            subtotal,
+            tax,
+            deliveryFee,
+            total,
+            user_name: userName,
+            email: user?.Email || "",
+            mob: user?.Mob || "",
+            Status: "Pending"
+        };
+
+        await axios.post("http://localhost:8080/createorder", orderPayload);
+
+        setCart(prevCart => prevCart.filter(item => item.restaurantName !== restaurantName));
+    } catch (err) {
+        console.error("Checkout failed", err);
+    }
+};
+
 
     return (
         <div className="cart-page">
@@ -91,100 +125,71 @@ export default function Cart() {
             </header>
 
             <div className="cart-main-content">
-                <div className="cart-items">
-                    {cart == null || cart.length === 0 ? (
-                        <div style={{textAlign: 'center', padding: '40px'}}>
-                            <h2>Your cart is empty!</h2>
-                            <Link to="/restaurants" style={{textDecoration:'none', color: '#ea580c'}}>Go to Restaurants</Link>
-                        </div>
-                    ) : (
-                        cart.map((item, index) => (
-                            <div key={index} className="cart-item-card">
-                                <img src={item.Image} alt={item.name} className="item-img" />
-                                
-                                <div className="item-details">
-                                    <h5 style={{margin: '0 0 5px 0', fontSize: '1.1rem'}}>{item.name}</h5>
-                                    <p style={{margin: 0, color: '#666'}}>Price: ${item.price}</p>
-                                </div>
+                {groupedCartArray.length === 0 ? (
+                    <div style={{textAlign: 'center', padding: '40px'}}>
+                        <h2>Your cart is empty!</h2>
+                        <Link to="/restaurants" style={{textDecoration:'none', color: '#ea580c'}}>Go to Restaurants</Link>
+                    </div>
+                ) : (
+                    groupedCartArray.map(([restaurant, items], index) => {
+                        const subtotalPerGroup = items.reduce((sum, i) => sum + i.Price * i.Quantity, 0);
+                        const taxPerGroup = subtotalPerGroup * taxRate;
+                        const totalPerGroup = subtotalPerGroup + taxPerGroup + deliveryFee;
 
-                                {/* QUANTITY CONTROLS */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                    <div style={{ 
-                                        display: 'flex', 
-                                        alignItems: 'center', 
-                                        border: '1px solid #ddd', 
-                                        borderRadius: '8px',
-                                        overflow: 'hidden'
-                                    }}>
-                                        <button 
-                                            onClick={() => handleQuantityChange(item, -1)}
-                                            style={{
-                                                border: 'none',
-                                                background: '#f8f9fa',
-                                                padding: '5px 12px',
-                                                cursor: 'pointer',
-                                                fontSize: '1.2rem',
-                                                color: '#ea580c'
-                                            }}
-                                        >−</button>
-                                        
-                                        <span style={{ 
-                                            padding: '0 10px', 
-                                            fontWeight: 'bold', 
-                                            minWidth: '20px', 
-                                            textAlign: 'center' 
-                                        }}>
-                                            {item.quantity}
-                                        </span>
-                                        
-                                        <button 
-                                            onClick={() => handleQuantityChange(item, 1)}
-                                            style={{
-                                                border: 'none',
-                                                background: '#f8f9fa',
-                                                padding: '5px 12px',
-                                                cursor: 'pointer',
-                                                fontSize: '1.2rem',
-                                                color: '#ea580c'
-                                            }}
-                                        >+</button>
+                        return (
+                            <div key={index} className="restaurant-card" style={{ marginBottom: '30px', padding: '20px', border: '1px solid #ddd', borderRadius: '12px', background: '#fff' }}>
+                                <h4>Restaurant: {restaurant}</h4>
+                                <hr />
+
+                                {items.map((item, idx) => (
+                                    <div key={idx} className="cart-item-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                            {item.Image && <img src={item.Image} alt={item.Name} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px' }} />}
+                                            <div>
+                                                <h5 style={{ margin: 0 }}>{item.Name}</h5>
+                                                <p style={{ margin: 0, color: '#666' }}>Price: ${item.Price}</p>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <button onClick={() => handleQuantityChange(item, -1)} style={{ padding: '4px 10px', cursor: 'pointer' }}>−</button>
+                                            <span>{item.Quantity}</span>
+                                            <button onClick={() => handleQuantityChange(item, 1)} style={{ padding: '4px 10px', cursor: 'pointer' }}>+</button>
+                                            <span>${(item.Price * item.Quantity).toFixed(2)}</span>
+                                        </div>
                                     </div>
-                                    
-                                    <div style={{fontWeight: 'bold', minWidth: '70px', textAlign: 'right'}}>
-                                        ${(item.price * item.quantity).toFixed(2)}
+                                ))}
+
+                                {/* Per-Restaurant Summary Card */}
+                                <div className="cart-summary" style={{ marginTop: '15px' }}>
+                                    <div className="summary-card">
+                                        <h2>Summary</h2>
+                                        <hr />
+                                        <p><strong>Subtotal: </strong>${subtotalPerGroup.toFixed(2)}</p>
+                                        <p><strong>Tax (10%): </strong>${taxPerGroup.toFixed(2)}</p>
+                                        <p><strong>Delivery Fee: </strong>${deliveryFee.toFixed(2)}</p>
+                                        <hr />
+                                        <p style={{fontSize: '1.2rem'}}><strong>Total: </strong>${totalPerGroup.toFixed(2)}</p>
+                                        
+                                        <button
+                                            className="btn btn-success"
+                                            onClick={() => handleCheckout(items)}
+                                            style={{width: '100%', marginTop: '10px'}}
+                                        >
+                                            Checkout
+                                        </button>
+                                        
+                                        <Link to="/restaurants">
+                                            <button className="btn btn-outline-secondary" style={{width: '100%', marginTop: '10px'}}>
+                                                Back to Menu
+                                            </button>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>
-                        ))
-                    )}
-                </div>
-
-                <div className="cart-summary">
-                    <div className="summary-card">
-                        <h2>Summary</h2>
-                        <hr />
-                        <p><strong>Subtotal: </strong>${subtotal.toFixed(2)}</p>
-                        <p><strong>Tax (10%): </strong>${tax.toFixed(2)}</p>
-                        <p><strong>Delivery Fee: </strong>${deliveryFee.toFixed(2)}</p>
-                        <hr />
-                        <p style={{fontSize: '1.2rem'}}><strong>Total: </strong>${total.toFixed(2)}</p>
-                        
-                        <button
-                            className="btn btn-success"
-                            onClick={handleCheckout}
-                            disabled={cart == null || cart.length === 0}
-                            style={{width: '100%', marginTop: '10px'}}
-                        >
-                            Checkout
-                        </button>
-                        
-                        <Link to="/restaurants">
-                            <button className="btn btn-outline-secondary" style={{width: '100%', marginTop: '10px'}}>
-                                Back to Menu
-                            </button>
-                        </Link>
-                    </div>
-                </div>
+                        );
+                    })
+                )}
             </div>
         </div>
     );

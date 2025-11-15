@@ -17,6 +17,10 @@ export default function RestaurantMenu() {
   const [cartCount, setCartCount] = useState(0);
   const [cartTotal, setCartTotal] = useState(0);
 
+  // Logged-in user info
+  const loggedInUserName = localStorage.getItem("ish_name") || "Guest";
+  const loggedInUserEmail = localStorage.getItem("ish_email") || "";
+
   useEffect(() => {
     const fetchData = async () => {
         try {
@@ -25,14 +29,13 @@ export default function RestaurantMenu() {
             setR(resRest.data);
 
             // 2. Fetch Current Cart (to sync quantities on load)
-            const resCart = await axios.get('http://localhost:8080/retrivetocart');
+            const resCart = await axios.get(`http://localhost:8080/retrivetocart?user_name=${loggedInUserName}`);
             
             // Calculate initial state from fetched cart
             const itemsMap = {};
             let totalC = 0;
             let totalP = 0;
             
-            // The backend returns array: [{name: "...", quantity: 2, price: ...}, ...]
             if (Array.isArray(resCart.data)) {
                 resCart.data.forEach(item => {
                     itemsMap[item.name] = item.quantity;
@@ -61,36 +64,38 @@ export default function RestaurantMenu() {
     const newQty = currentQty + delta;
     const price = Number(item.price ?? 0);
 
-    // 1. Optimistic UI Update (Make it feel instant)
+    // Optimistic UI update
     setCartItems(prev => {
         const copy = { ...prev };
-        if (newQty <= 0) delete copy[item.name]; // Remove key if 0
-        else copy[item.name] = newQty; // Update key
+        if (newQty <= 0) delete copy[item.name];
+        else copy[item.name] = newQty;
         return copy;
     });
     setCartCount(prev => prev + delta);
     setCartTotal(prev => prev + (delta * price));
 
     try {
-        // 2. Send Request to Backend
         if (newQty === 0 && delta === -1) {
-            // Special Case: Quantity hit 0, so DELETE the item
             await axios.post('http://localhost:8080/deletefromcart', { 
-                name: item.name 
+                name: item.name,
+                ownerName: r.ownerName,          // Restaurant owner
+                restaurantName: r.name,          // Restaurant name
+                user_name: loggedInUserName      // Current user
             });
         } else {
-            // Normal Case: Increment or Decrement using the upsert logic
-            // Note: We send Quantity: 1 or -1. The backend $inc handles the math.
             await axios.post('http://localhost:8080/addtocart', {
                 Image: item.image || '',
                 Name: item.name,
                 Price: price,
-                Quantity: delta // +1 or -1
+                Quantity: delta,
+                ownerName: r.ownerName,          // Restaurant owner
+                restaurantName: r.name,          // Restaurant name
+                user_name: loggedInUserName,     // Current user
+                email: loggedInUserEmail         // User email
             });
         }
     } catch (e) {
         console.error("Cart update failed:", e);
-        // Optionally revert state here if needed
         alert('Failed to update cart');
     }
   };
@@ -121,7 +126,7 @@ export default function RestaurantMenu() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
             {r.menu.map((it, idx) => {
-              const qty = cartItems[it.name] || 0; // Get quantity for this specific item
+              const qty = cartItems[it.name] || 0;
 
               return (
                 <div 
@@ -171,7 +176,6 @@ export default function RestaurantMenu() {
 
                   {/* Add / Increment Logic */}
                   {qty === 0 ? (
-                    // Case 1: Item NOT in cart -> Show "ADD" button
                     <button
                       style={{
                         background: 'white',
@@ -198,16 +202,14 @@ export default function RestaurantMenu() {
                       ADD
                     </button>
                   ) : (
-                    // Case 2: Item IS in cart -> Show Counter Control
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
-                        background: '#fff7ed', // light orange bg
+                        background: '#fff7ed',
                         border: '1px solid #ea580c',
                         borderRadius: '8px',
                         overflow: 'hidden'
                     }}>
-                        {/* Decrement Button */}
                         <button
                             style={{
                                 background: 'transparent',
@@ -223,8 +225,6 @@ export default function RestaurantMenu() {
                         >
                             −
                         </button>
-
-                        {/* Count Display */}
                         <span style={{
                             color: '#ea580c',
                             fontWeight: '600',
@@ -234,8 +234,6 @@ export default function RestaurantMenu() {
                         }}>
                             {qty}
                         </span>
-
-                        {/* Increment Button */}
                         <button
                             style={{
                                 background: 'transparent',
@@ -259,7 +257,7 @@ export default function RestaurantMenu() {
           </div>
         )}
 
-        {/* Sticky proceed bar (Only shows if cart has items) */}
+        {/* Sticky proceed bar */}
         {cartCount > 0 && (
             <div style={{
             position: 'fixed',
@@ -268,7 +266,7 @@ export default function RestaurantMenu() {
             transform: 'translateX(-50%)',
             maxWidth: '900px',
             width: 'calc(100% - 48px)',
-            background: '#2d2d2d', // Dark bar like Swiggy/Zomato
+            background: '#2d2d2d',
             color: 'white',
             boxShadow: '0 8px 30px rgba(0,0,0,0.3)',
             borderRadius: '12px',
