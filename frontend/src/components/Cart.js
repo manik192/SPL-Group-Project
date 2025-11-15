@@ -86,7 +86,7 @@ export default function Cart() {
         <div className="cart-page">
             <header className="cart-header">
                 <div className="hero-banner">
-                    <h1>Your Shopping Cart</h1>
+                    <h1>My Shopping Cart</h1>
                 </div>
             </header>
 

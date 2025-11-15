@@ -143,10 +143,7 @@ const RestaurantDashboard = () => {
     setMenuItem((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/Login");
-  };
+  
 
   return (
     <div style={{ 
@@ -164,7 +161,7 @@ const RestaurantDashboard = () => {
               Editing Menu for: <strong style={{color: "#ea580c"}}>{ownerName || "Loading..."}</strong>
             </p>
           </div>
-          <button onClick={handleLogout} style={btnStyleSecondary}>Logout</button>
+          
         </div>
 
         {/* --- FORM SECTION --- */}
@@ -212,7 +209,7 @@ const RestaurantDashboard = () => {
             {/* Buttons */}
             <div style={{ display: "flex", gap: "10px" }}>
               <button type="submit" disabled={status.isLoading || !ownerName} style={editingItemName ? btnStyleUpdate : btnStyleAdd}>
-                {status.isLoading ? "Processing..." : (editingItemName ? "Update Item" : "+ Add Item to Database")}
+                {status.isLoading ? "Processing..." : (editingItemName ? "Update Item" : "+ Add Item to Menu")}
               </button>
               
               {editingItemName && (

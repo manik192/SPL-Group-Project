@@ -109,7 +109,7 @@ export default function RestaurantList() {
                   </span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <span>🚚</span>
-                    <span>Free delivery</span>
+                    <span>Delivery fees apply</span>
                   </span>
                 </div>
 
