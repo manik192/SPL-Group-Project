@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"net/http"
 	"strconv" // <— add this
+	"strings"
 	"time"
-	 "strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"github.com/google/uuid"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -249,7 +249,6 @@ func InsertCart(c *fiber.Ctx) error {
 	})
 }
 
-
 // Retrieve shopping cart items for the currently logged-in user
 func RetriveToCart(c *fiber.Ctx) error {
 	// Get logged-in user's name from query or headers (frontend should send it)
@@ -283,7 +282,6 @@ func RetriveToCart(c *fiber.Ctx) error {
 
 	return c.Status(http.StatusOK).JSON(cart)
 }
-
 
 // Login user
 func Login(c *fiber.Ctx) error {
@@ -618,7 +616,6 @@ func EditMenu(c *fiber.Ctx) error {
 		"message": "Menu item updated successfully",
 	})
 
-
 }
 
 func CreateOrder(c *fiber.Ctx) error {
@@ -657,37 +654,35 @@ func CreateOrder(c *fiber.Ctx) error {
 		"order":   order,
 	})
 
-
 }
 
 // GetOrders fetches all orders
 func GetOrders(c *fiber.Ctx) error {
-    ordersCollection := config.GetCollection(config.DB, "orders")
-    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-    defer cancel()
+	ordersCollection := config.GetCollection(config.DB, "orders")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-    // Optional: fetch by owner query param
-    ownerName := c.Query("owner") // /orders?owner=ownerName
+	// Optional: fetch by owner query param
+	ownerName := c.Query("owner") // /orders?owner=ownerName
 
-    filter := bson.M{}
-    if ownerName != "" {
-        filter["ownerName"] = ownerName
-    }
+	filter := bson.M{}
+	if ownerName != "" {
+		filter["ownerName"] = ownerName
+	}
 
-    cursor, err := ordersCollection.Find(ctx, filter)
-    if err != nil {
-        return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch orders"})
-    }
-    defer cursor.Close(ctx)
+	cursor, err := ordersCollection.Find(ctx, filter)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch orders"})
+	}
+	defer cursor.Close(ctx)
 
-    var orders []model.OrderCollection
-    if err := cursor.All(ctx, &orders); err != nil {
-        return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to parse orders"})
-    }
+	var orders []model.OrderCollection
+	if err := cursor.All(ctx, &orders); err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to parse orders"})
+	}
 
-    return c.Status(http.StatusOK).JSON(orders)
+	return c.Status(http.StatusOK).JSON(orders)
 }
-
 
 func GetUser(c *fiber.Ctx) error {
 	// Get username from query parameter
@@ -726,45 +721,43 @@ func GetUser(c *fiber.Ctx) error {
 	return c.JSON(user)
 }
 
-
 func CompleteOrder(c *fiber.Ctx) error {
-    type requestBody struct {
-        UserName  string `json:"user_name"`
-        OwnerName string `json:"ownerName"`
-    }
+	type requestBody struct {
+		UserName  string `json:"user_name"`
+		OwnerName string `json:"ownerName"`
+	}
 
-    var body requestBody
-    if err := c.BodyParser(&body); err != nil {
-        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
-    }
+	var body requestBody
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
+	}
 
-    if body.UserName == "" || body.OwnerName == "" {
-        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "user_name and ownerName are required"})
-    }
+	if body.UserName == "" || body.OwnerName == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "user_name and ownerName are required"})
+	}
 
-    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-    defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-    ordersCollection := config.GetCollection(config.DB, "orders")
+	ordersCollection := config.GetCollection(config.DB, "orders")
 
-    // Build the filter
-    filter := bson.M{
-        "UserName":  body.UserName,
-        "OwnerName": body.OwnerName,
-    }
+	// Build the filter
+	filter := bson.M{
+		"username":  body.UserName,
+		"ownername": body.OwnerName,
+	}
 
-    // Print the filter for debugging
-    fmt.Printf("MongoDB delete filter: %+v\n", filter)
+	// Print the filter for debugging
+	fmt.Printf("MongoDB delete filter: %+v\n", filter)
 
-    // Delete all orders matching the filter
-    res, err := ordersCollection.DeleteMany(ctx, filter)
-    if err != nil {
-        return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to complete order"})
-    }
+	// Delete all orders matching the filter
+	res, err := ordersCollection.DeleteMany(ctx, filter)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to complete order"})
+	}
 
-    return c.JSON(fiber.Map{
-        "message":       "Order(s) completed successfully",
-        "deleted_count": res.DeletedCount,
-    })
+	return c.JSON(fiber.Map{
+		"message":       "Order(s) completed successfully",
+		"deleted_count": res.DeletedCount,
+	})
 }
-
