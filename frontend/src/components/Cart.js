@@ -110,6 +110,10 @@ export default function Cart() {
         await axios.post("http://localhost:8080/createorder", orderPayload);
 
         setCart(prevCart => prevCart.filter(item => item.restaurantName !== restaurantName));
+         if (cart != null && cart.length > 0) {
+            await axios.post("http://localhost:8080/clearcart");
+            navigate('/Cartt', { state: { isCartCheckedOut: true } });
+        }
     } catch (err) {
         console.error("Checkout failed", err);
     }
