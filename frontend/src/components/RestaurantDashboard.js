@@ -94,6 +94,7 @@ const fetchOrders = async (owner) => {
           user_name: curr.user_name,
           mob: curr.mob,
           email: curr.email,
+          address: curr.address,
           items: [],
           total: curr.total
         };
@@ -329,6 +330,7 @@ const fetchOrders = async (owner) => {
             <h4 style={{ margin: 0, color: "#1f2937" }}>{user.user_name || "Unknown User"}</h4>
             <p style={{ margin: "4px 0", fontSize: "13px", color: "#6b7280" }}>📞 {user.mob || "No mobile"}</p>
             <p style={{ margin: "4px 0", fontSize: "13px", color: "#6b7280" }}>📧 {user.email || "No email"}</p>
+            <p style={{ margin: "4px 0", fontSize: "13px", color: "#6b7280" }}>📍 {user.address || "No address"}</p>
             <p style={{ fontWeight: "bold", margin: "6px 0", color: "#ea580c" }}>Total: ${user.total}</p>
 
             <div style={{ marginTop: "12px", borderTop: "1px solid #f3f4f6", paddingTop: "12px" }}>

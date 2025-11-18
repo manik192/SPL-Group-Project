@@ -85,7 +85,7 @@ func RegisterUser(c *fiber.Ctx) error {
 	restCol := config.GetCollection(config.DB, "restaurants")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-
+	print(c.Body())
 	var in struct {
 		Mob        string `json:"mob"`
 		Name       string `json:"name"`
@@ -99,6 +99,10 @@ func RegisterUser(c *fiber.Ctx) error {
 			Logo    string           `json:"logo"`
 			Menu    []model.MenuItem `json:"menu"` // <— array of items
 		} `json:"restaurant,omitempty"`
+		UserDetails *struct {
+			Address    string `json:"address"`
+			SpiceLevel string `json:"spiceLevel"`
+		}
 	}
 	if err := c.BodyParser(&in); err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid body"})
@@ -110,6 +114,8 @@ func RegisterUser(c *fiber.Ctx) error {
 	// create user
 	_, err := usersCol.InsertOne(ctx, model.User{
 		Mob: in.Mob, Name: in.Name, Email: in.Email, Password: in.Password, Role: in.Role,
+		Address:    in.UserDetails.Address,
+		SpiceLevel: in.UserDetails.SpiceLevel,
 	})
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "db insert user failed"})
