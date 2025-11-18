@@ -92,7 +92,7 @@ export default function Cart() {
         const total = subtotal + tax + deliveryFee;
         const restaurantName = itemsToCheckout[0].restaurantName;
         const ownerName = itemsToCheckout[0].ownerName;
-
+        console.log("user:", user);
         const orderPayload = {
             restaurantName,
             ownerName,
@@ -104,7 +104,8 @@ export default function Cart() {
             user_name: userName,
             email: user?.Email || "",
             mob: user?.Mob || "",
-            Status: "Pending"
+            Status: "Pending",
+            address: user?.address || "",
         };
 
         await axios.post("http://localhost:8080/createorder", orderPayload);
