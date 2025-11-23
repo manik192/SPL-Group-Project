@@ -28,9 +28,6 @@ function App() {
 
         {/* Legacy /Menu -> /restaurants */}
         <Route path="/Menu" element={<Navigate to="/restaurants" replace />} />
-
-        {/* Protected routes (change logic per v6, see notes below!) */}
-        {/* For v6, you must use element={<ProtectedRoute><OrderPizza /></ProtectedRoute>} */}
      
 
         <Route path="/Cart" element={
