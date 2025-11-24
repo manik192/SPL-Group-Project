@@ -109,15 +109,37 @@ export default function RestaurantMenu() {
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #fef5ee 0%, #fde8d7 25%, #fdd7ba 50%, #fcc89b 75%, #fbb87d 100%)', paddingBottom: '120px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 24px' }}>
         
-        {/* Header */}
-        <header style={{ marginBottom: '40px' }}>
-          <h2 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '8px', color: '#2d2d2d' }}>
-            {r.name}<span style={{ fontWeight: '400', color: '#8e8e8e' }}> Menu</span>
-          </h2>
-          <div style={{ fontSize: '0.875rem', color: '#8e8e8e' }}>
-            {r.address || 'Location'} {r.phone && <span style={{ padding: '0 8px' }}>•</span>} {r.phone}
-          </div>
-        </header>
+<header style={{ marginBottom: '40px' }}>
+
+  <button
+    onClick={() => navigate(-1)}
+    style={{
+      background: 'white',
+      border: '1px solid #ea580c',
+      color: '#ea580c',
+      padding: '8px 16px',
+      borderRadius: '8px',
+      cursor: 'pointer',
+      fontWeight: '600',
+      marginBottom: '16px',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '6px'
+    }}
+  >
+    ← Back
+  </button>
+
+  <h2 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '8px', color: '#2d2d2d' }}>
+    {r.name}<span style={{ fontWeight: '400', color: '#8e8e8e' }}> Menu</span>
+  </h2>
+
+  <div style={{ fontSize: '0.875rem', color: '#8e8e8e' }}>
+    {r.address || 'Location'} {r.phone && <span style={{ padding: '0 8px' }}>•</span>} {r.phone}
+  </div>
+
+</header>
+
 
         {(!r.menu || r.menu.length === 0) ? (
           <div style={{ background: 'white', padding: '24px', borderRadius: '12px', color: '#8e8e8e', textAlign: 'center' }}>
