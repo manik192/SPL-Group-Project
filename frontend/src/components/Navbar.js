@@ -18,6 +18,9 @@ const Navbar = () => {
 
     const handleNavigate = (path) => navigate(path);
 
+    // 🔥 Add this to detect role
+    const role = localStorage.getItem("ish_role");
+
     return (
         <nav style={{ 
             background: 'rgba(254, 247, 238, 0.95)', 
@@ -77,36 +80,40 @@ const Navbar = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     {isLoggedIn ? (
                         <>
-                            <button 
-                                onClick={() => handleNavigate("/Cart")}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                    background: '#ea580c',
-                                    color: 'white',
-                                    border: 'none',
-                                    padding: '8px 16px',
-                                    borderRadius: '6px',
-                                    fontWeight: '500',
-                                    fontSize: '14px',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s'
-                                }}
-                                onMouseOver={(e) => {
-                                    e.currentTarget.style.background = '#dc2626';
-                                    e.currentTarget.style.transform = 'scale(1.02)';
-                                }}
-                                onMouseOut={(e) => {
-                                    e.currentTarget.style.background = '#ea580c';
-                                    e.currentTarget.style.transform = 'scale(1)';
-                                }}
-                            >
-                                <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
-                                </svg>
-                                Cart
-                            </button>
+                            {/* 🔥 Hide Cart for restaurant */}
+                            {role !== "restaurant" && (
+                                <button 
+                                    onClick={() => handleNavigate("/Cart")}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        background: '#ea580c',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '8px 16px',
+                                        borderRadius: '6px',
+                                        fontWeight: '500',
+                                        fontSize: '14px',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}
+                                    onMouseOver={(e) => {
+                                        e.currentTarget.style.background = '#dc2626';
+                                        e.currentTarget.style.transform = 'scale(1.02)';
+                                    }}
+                                    onMouseOut={(e) => {
+                                        e.currentTarget.style.background = '#ea580c';
+                                        e.currentTarget.style.transform = 'scale(1)';
+                                    }}
+                                >
+                                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                                    </svg>
+                                    Cart
+                                </button>
+                            )}
+
                             <button 
                                 onClick={handleLogout}
                                 style={{
