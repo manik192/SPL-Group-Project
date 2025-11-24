@@ -5,7 +5,7 @@ import axios from 'axios';
 export default function RestaurantList() {
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");  // 🔍 search bar
+  const [search, setSearch] = useState(""); // 🔍 Search state
 
   useEffect(() => {
     axios.get('http://localhost:8080/restaurants')
@@ -41,7 +41,7 @@ export default function RestaurantList() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search restaurants or menu items..."
+            placeholder="Search restaurants..."
             style={{
               width: '100%',
               maxWidth: '400px',
@@ -63,28 +63,12 @@ export default function RestaurantList() {
           </p>
         </div>
 
-        {/* Restaurant Cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
-
           {restaurants
-            .filter(r => {
-              const term = search.toLowerCase();
-
-              // match restaurant name
-              if (r.name?.toLowerCase().includes(term)) return true;
-
-              // match address
-              if (r.address?.toLowerCase().includes(term)) return true;
-
-              // match ANY menu item name
-              if (Array.isArray(r.menu)) {
-                for (const item of r.menu) {
-                  if (item.name?.toLowerCase().includes(term)) return true;
-                }
-              }
-
-              return false;
-            })
+            .filter(r =>
+              r.name?.toLowerCase().includes(search.toLowerCase()) ||
+              r.address?.toLowerCase().includes(search.toLowerCase())
+            )
             .map((restaurant, idx) => {
               const rid = restaurant._id || restaurant.id || restaurant.ID;
 
@@ -108,7 +92,6 @@ export default function RestaurantList() {
                     e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
                   }}
                 >
-                  {/* Card Header */}
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '12px' }}>
                     <div style={{
                       width: '48px',
@@ -140,7 +123,6 @@ export default function RestaurantList() {
                     </div>
                   </div>
 
-                  {/* Address */}
                   {restaurant.address && (
                     <div style={{
                       display: 'flex',
@@ -155,7 +137,6 @@ export default function RestaurantList() {
                     </div>
                   )}
 
-                  {/* Phone */}
                   {restaurant.phone && (
                     <div style={{
                       display: 'flex',
@@ -170,7 +151,6 @@ export default function RestaurantList() {
                     </div>
                   )}
 
-                  {/* View Menu Button */}
                   <Link
                     to={`/restaurants/${rid}`}
                     style={{
@@ -192,19 +172,13 @@ export default function RestaurantList() {
             })}
         </div>
 
-        {/* No Restaurants Found */}
         {restaurants.length === 0 && (
           <div style={{ textAlign: 'center', padding: '64px 0' }}>
             <div style={{ fontSize: '4rem', marginBottom: '16px' }}>🍽️</div>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '8px' }}>
-              No restaurants available yet
-            </h3>
-            <p style={{ color: '#6b7280', marginBottom: '24px' }}>
-              Check back soon for amazing Indian restaurants!
-            </p>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '8px' }}>No restaurants available yet</h3>
+            <p style={{ color: '#6b7280', marginBottom: '24px' }}>Check back soon for amazing Indian restaurants!</p>
           </div>
         )}
-
       </div>
     </div>
   );
